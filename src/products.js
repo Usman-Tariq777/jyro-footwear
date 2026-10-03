@@ -2,8 +2,8 @@
 export const SHOP = {
   name: "Jyro Footwear",
   tagline: "Comfort you can feel. Style people notice.",
-  whatsapp: "923034455255", // 0303 4455255 -> country code 92, no leading 0
-  phoneShow: "0303 4455255",
+  whatsapp: "923187714150", // 0318 7714150 -> country code 92, no leading 0
+  phoneShow: "0318 7714150",
   city: "Lahore",
   ceo: "Javed Iqbal",
 };
