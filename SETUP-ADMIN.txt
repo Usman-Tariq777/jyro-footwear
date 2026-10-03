@@ -1,0 +1,13 @@
+ADMIN SETUP (do once)
+1. supabase.com -> New project (free).
+2. SQL Editor -> New query -> paste everything from setup.sql -> Run.
+3. Authentication -> Users -> Add user (create "Create new user", tick auto-confirm): one for you, one for your cousin.
+4. Authentication -> Sign In / Providers -> turn OFF "Allow new users to sign up". (Important: only you two can log in.)
+5. Project Settings -> API: copy "Project URL" and the "anon public" key.
+6. Vercel -> your project -> Settings -> Environment Variables. Add:
+     VITE_SUPABASE_URL      = your Project URL
+     VITE_SUPABASE_ANON_KEY = your anon public key
+   Then Deployments -> Redeploy.
+7. Open  yoursite.vercel.app/admin  and log in. Add your shoes.
+NEVER put the "service_role" key anywhere in this project.
+Local testing: copy .env.example to .env and fill the two values.
