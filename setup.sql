@@ -32,3 +32,24 @@ create policy "public read images"  on storage.objects for select using (bucket_
 create policy "owners upload images" on storage.objects for insert to authenticated with check (bucket_id = 'shoe-images');
 create policy "owners update images" on storage.objects for update to authenticated using (bucket_id = 'shoe-images');
 create policy "owners delete images" on storage.objects for delete to authenticated using (bucket_id = 'shoe-images');
+
+-- Reviews table
+create table public.reviews (
+  id bigint generated always as identity primary key,
+  name text not null,
+  city text,
+  rating integer not null check (rating >= 1 and rating <= 5),
+  text text not null,
+  approved boolean default false,
+  created_at timestamptz default now()
+);
+
+alter table public.reviews enable row level security;
+
+-- Everyone can read approved reviews
+create policy "public read approved" on public.reviews for select using (approved = true);
+-- Logged-in owners can read, add, edit, delete all reviews
+create policy "owners read all" on public.reviews for select to authenticated using (true);
+create policy "owners insert" on public.reviews for insert to authenticated with check (true);
+create policy "owners update" on public.reviews for update to authenticated using (true);
+create policy "owners delete" on public.reviews for delete to authenticated using (true);

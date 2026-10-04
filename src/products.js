@@ -33,7 +33,7 @@ export const PRODUCTS = [
 ];
 
 export const REVIEWS = [
-  { name: "Ali Raza", city: "Lahore", text: "Ordered on WhatsApp in 2 minutes. Shoes arrived next day and the fitting was perfect." },
-  { name: "Usman Tariq", city: "Gujranwala", text: "Quality is much better than the price. Very comfortable for long walks." },
-  { name: "Hamza Sheikh", city: "Faisalabad", text: "Size exchange was easy and the team replied fast. Will order again." },
+  { name: "Ali Raza", city: "Lahore", text: "Ordered on WhatsApp in 2 minutes. Shoes arrived next day and the fitting was perfect.", rating: 5 },
+  { name: "Usman Tariq", city: "Gujranwala", text: "Quality is much better than the price. Very comfortable for long walks.", rating: 5 },
+  { name: "Hamza Sheikh", city: "Faisalabad", text: "Size exchange was easy and the team replied fast. Will order again.", rating: 4 },
 ];
