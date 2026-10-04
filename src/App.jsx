@@ -109,7 +109,7 @@ function Shop() {
           <div className="ring" />
           <img src="/images/logo.png" alt="Jyro Footwear" />
           <div className="float-tag t1">New collection</div>
-          <div className="float-tag t2">From {rs(Math.min(...(products.length ? products : PRODUCTS).map((p) => p.price)))}</div>
+
         </Tilt>
       </section>
 
