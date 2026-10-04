@@ -40,14 +40,13 @@ create table public.reviews (
   city text,
   rating integer not null check (rating >= 1 and rating <= 5),
   text text not null,
-  approved boolean default false,
   created_at timestamptz default now()
 );
 
 alter table public.reviews enable row level security;
 
--- Everyone can read approved reviews
-create policy "public read approved" on public.reviews for select using (approved = true);
+-- Everyone can read all reviews
+create policy "public read all" on public.reviews for select using (true);
 -- Logged-in owners can read, add, edit, delete all reviews
 create policy "owners read all" on public.reviews for select to authenticated using (true);
 create policy "owners insert" on public.reviews for insert to authenticated with check (true);

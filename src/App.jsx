@@ -60,7 +60,7 @@ function Shop() {
         if (error) return setProducts(PRODUCTS);
         setProducts(data.map((r) => ({ id: r.id, name: r.name, category: r.category || "Shoes", price: r.price, oldPrice: r.old_price || null, tag: r.tag, image: r.image_url, description: r.description || "", sizes: r.sizes || [], colors: r.colors || "", soldOut: r.sold_out })));
       });
-    supabase.from("reviews").select("*").eq("approved", true).order("created_at", { ascending: false })
+    supabase.from("reviews").select("*").order("created_at", { ascending: false })
       .then(({ data, error }) => {
         if (error) return setReviews(REVIEWS);
         setReviews(data.map((r) => ({ name: r.name, city: r.city, text: r.text, rating: r.rating })));
@@ -102,8 +102,17 @@ function Shop() {
         city: reviewForm.city,
         rating: reviewForm.rating,
         text: reviewForm.text,
-        approved: false
+        approved: true
       });
+    } else {
+      // Fallback: add to local reviews array for demo
+      const newReview = {
+        name: reviewForm.name,
+        city: reviewForm.city,
+        rating: reviewForm.rating,
+        text: reviewForm.text
+      };
+      setReviews(prev => [newReview, ...prev]);
     }
     
     setReviewSubmitted(true);
@@ -252,7 +261,7 @@ function Shop() {
               <h3>Write a review</h3>
               {reviewSubmitted ? (
                 <div className="review-success">
-                  <p>Thank you for your review! It will be visible after approval.</p>
+                  <p>Thank you for your review! It has been added to the website.</p>
                 </div>
               ) : (
                 <form onSubmit={submitReview}>
