@@ -23,7 +23,6 @@ export default function Admin() {
   const [pass, setPass] = useState("");
   const [msg, setMsg] = useState("");
   const [items, setItems] = useState([]);
-  const [reviews, setReviews] = useState([]);
   const [f, setF] = useState(empty);
   const [busy, setBusy] = useState(false);
 
@@ -37,8 +36,6 @@ export default function Admin() {
   const load = async () => {
     const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
     if (error) setMsg(error.message); else setItems(data);
-    const { data: revData, error: revError } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });
-    if (!revError) setReviews(revData);
   };
   useEffect(() => { if (session) load(); }, [session]);
 
@@ -94,7 +91,6 @@ export default function Admin() {
   const edit = (p) => { setF({ ...p, old_price: p.old_price ?? "", tag: p.tag ?? "", description: p.description ?? "", colors: p.colors ?? "", sizes: (p.sizes || []).join(", ") }); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const quick = async (p, patch) => { await supabase.from("products").update(patch).eq("id", p.id); load(); };
   const del = async (p) => { if (window.confirm(`Delete "${p.name}" forever?`)) { await supabase.from("products").delete().eq("id", p.id); load(); } };
-  const deleteReview = async (r) => { if (window.confirm(`Delete review from "${r.name}"?`)) { await supabase.from("reviews").delete().eq("id", r.id); load(); } };
 
   return (
     <div className="adm">
@@ -135,18 +131,6 @@ export default function Admin() {
             </div>
           </div>
         ))}
-      </div>
-      <h3 className="ah">Reviews ({reviews.length})</h3>
-      <div className="alist">
-        {reviews.map((r) => (
-          <div className="arow" key={r.id}>
-            <div style={{flex: 1, minWidth: 200}}><b>{r.name}</b><span>{r.city || "No city"} · {"★".repeat(r.rating)}</span><span style={{display: "block", marginTop: 4, fontSize: "0.85rem"}}>{r.text}</span></div>
-            <div className="abtns">
-              <button className="chip del" onClick={() => deleteReview(r)}>Delete</button>
-            </div>
-          </div>
-        ))}
-        {reviews.length === 0 && <p className="lead">No reviews yet.</p>}
       </div>
     </div>
   );

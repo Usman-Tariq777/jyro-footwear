@@ -52,7 +52,6 @@ export default function App() {
 
 function Shop() {
   const [products, setProducts] = useState(supabase ? [] : PRODUCTS);
-  const [reviews, setReviews] = useState(supabase ? [] : REVIEWS);
   useEffect(() => {
     if (!supabase) return;
     supabase.from("products").select("*").eq("visible", true).order("created_at", { ascending: false })
@@ -60,20 +59,12 @@ function Shop() {
         if (error) return setProducts(PRODUCTS);
         setProducts(data.map((r) => ({ id: r.id, name: r.name, category: r.category || "Shoes", price: r.price, oldPrice: r.old_price || null, tag: r.tag, image: r.image_url, description: r.description || "", sizes: r.sizes || [], colors: r.colors || "", soldOut: r.sold_out })));
       });
-    supabase.from("reviews").select("*").order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) return setReviews(REVIEWS);
-        setReviews(data.map((r) => ({ name: r.name, city: r.city, text: r.text, rating: r.rating })));
-      });
   }, []);
   const cats = ["All", ...new Set(products.map((p) => p.category))];
   const [cat, setCat] = useState("All");
   const [open, setOpen] = useState(null);
   const [size, setSize] = useState(null);
   const [scrolled, setScrolled] = useState(false);
-  const [reviewOpen, setReviewOpen] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ name: "", city: "", rating: 5, text: "" });
-  const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const list = useMemo(() => products.filter((p) => cat === "All" || p.category === cat), [cat, products]);
   const view = (p) => { setOpen(p); setSize(null); };
 
@@ -91,37 +82,6 @@ function Shop() {
 
   const order = (p, s) => wa(`Hello ${SHOP.name}! I want to order:\n${p.name} (${p.colors})\nSize: ${s || "not selected"}\nPrice: ${rs(p.price)}\nPlease confirm availability.`);
   const ticker = ["Free delivery in Lahore", "Cash on delivery", "Easy size exchange", "Order on WhatsApp", "Limited stock"];
-
-  const submitReview = async (e) => {
-    e.preventDefault();
-    if (!reviewForm.name || !reviewForm.text) return;
-    
-    if (supabase) {
-      await supabase.from("reviews").insert({
-        name: reviewForm.name,
-        city: reviewForm.city,
-        rating: reviewForm.rating,
-        text: reviewForm.text,
-        approved: true
-      });
-    } else {
-      // Fallback: add to local reviews array for demo
-      const newReview = {
-        name: reviewForm.name,
-        city: reviewForm.city,
-        rating: reviewForm.rating,
-        text: reviewForm.text
-      };
-      setReviews(prev => [newReview, ...prev]);
-    }
-    
-    setReviewSubmitted(true);
-    setReviewForm({ name: "", city: "", rating: 5, text: "" });
-    setTimeout(() => {
-      setReviewSubmitted(false);
-      setReviewOpen(false);
-    }, 3000);
-  };
 
   return (
     <>
@@ -209,16 +169,9 @@ function Shop() {
 
       <section className="reviews">
         <Reveal><h2>What customers say</h2></Reveal>
-        <div className="rgrid">{reviews.map((r, i) => (
-          <Reveal key={r.name + i} delay={i * 120} className="review">
-            <div className="stars">{"★".repeat(r.rating || 5)}{"☆".repeat(5 - (r.rating || 5))}</div>
-            <p>{r.text}</p>
-            <b>{r.name}</b><span>{r.city}</span>
-          </Reveal>
+        <div className="rgrid">{REVIEWS.map((r, i) => (
+          <Reveal key={r.name} delay={i * 120} className="review"><div className="stars">★★★★★</div><p>{r.text}</p><b>{r.name}</b><span>{r.city}</span></Reveal>
         ))}</div>
-        <Reveal className="review-cta">
-          <button className="btn ghost" onClick={() => setReviewOpen(true)}>Write a review</button>
-        </Reveal>
       </section>
 
       <section className="contact" id="contact">
@@ -241,62 +194,13 @@ function Shop() {
             <div className="m-info">
               <span className="tag">{open.category}</span>
               <h3>{open.name}</h3>
-              <div className="pr big"><strong>{open.price === 0 ? "Price on request" : rs(open.price)}</strong>{open.oldPrice && open.price !== 0 && <s>{rs(open.oldPrice)}</s>}</div>
+              <div className="pr big"><strong>{rs(open.price)}</strong>{open.oldPrice && <s>{rs(open.oldPrice)}</s>}</div>
               <p>{open.description}</p>
               <p className="meta">Colour: {open.colors}</p>
               <p className="meta">Choose size</p>
               <div className="sizes">{open.sizes.map((s) => <button key={s} className={s === size ? "size on" : "size"} onClick={() => setSize(s)}>{s}</button>)}</div>
-              {open.soldOut || open.price === 0 ? <span className="btn full ghost dis">Sold out</span> : <a className="btn full" href={order(open, size)} target="_blank" rel="noreferrer">Order on WhatsApp</a>}
+              {open.soldOut ? <span className="btn full ghost dis">Sold out</span> : <a className="btn full" href={order(open, size)} target="_blank" rel="noreferrer">Order on WhatsApp</a>}
               <p className="meta small">Cash on delivery · Easy size exchange</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {reviewOpen && (
-        <div className="overlay" onClick={() => setReviewOpen(false)}>
-          <div className="modal review-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-            <button className="close" onClick={() => setReviewOpen(false)} aria-label="Close">×</button>
-            <div className="m-info">
-              <h3>Write a review</h3>
-              {reviewSubmitted ? (
-                <div className="review-success">
-                  <p>Thank you for your review! It has been added to the website.</p>
-                </div>
-              ) : (
-                <form onSubmit={submitReview}>
-                  <label className="meta">Your name *</label>
-                  <input type="text" value={reviewForm.name} onChange={(e) => setReviewForm({...reviewForm, name: e.target.value})} placeholder="Enter your name" required />
-                  
-                  <label className="meta">City (optional)</label>
-                  <input type="text" value={reviewForm.city} onChange={(e) => setReviewForm({...reviewForm, city: e.target.value})} placeholder="Your city" />
-                  
-                  <label className="meta">Rating *</label>
-                  <div className="rating-input">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        className={`star-btn ${star <= reviewForm.rating ? "filled" : ""}`}
-                        onClick={() => setReviewForm({...reviewForm, rating: star})}
-                      >
-                        ★
-                      </button>
-                    ))}
-                  </div>
-                  
-                  <label className="meta">Your review *</label>
-                  <textarea
-                    value={reviewForm.text}
-                    onChange={(e) => setReviewForm({...reviewForm, text: e.target.value})}
-                    placeholder="Share your experience with our shoes..."
-                    rows="4"
-                    required
-                  />
-                  
-                  <button type="submit" className="btn full">Submit review</button>
-                </form>
-              )}
             </div>
           </div>
         </div>
